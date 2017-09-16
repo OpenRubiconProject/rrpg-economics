@@ -1,0 +1,11 @@
+name: RRPGEconomics
+version: 0.0.1
+authors: [ShawnClake, QuinnBast]
+main: com.openrubicon.economics.RRPGEconomics
+depend: [RRPGCore]
+database: true
+website: https://github.com/OpenRubiconProject
+commands:
+      rrpg-economics:
+               description: Spits out the current status of Rubicon Economics and its versions
+               usage: /rrpg-economics
