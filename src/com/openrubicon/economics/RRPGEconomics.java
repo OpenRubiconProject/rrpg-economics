@@ -1,10 +1,20 @@
 package com.openrubicon.economics;
 
 import com.openrubicon.core.RRPGCore;
+import com.openrubicon.core.database.interfaces.DatabaseModel;
 import org.bukkit.plugin.java.JavaPlugin;
-import com.openrubicon.core.interfaces.iModule;
+import com.openrubicon.core.interfaces.Module;
 
-public class RRPGEconomics extends JavaPlugin implements iModule {
+import java.util.ArrayList;
+
+public class RRPGEconomics extends JavaPlugin implements Module {
+
+    @Override
+    public ArrayList<DatabaseModel> getDatabaseModels() {
+        ArrayList<DatabaseModel> models = new ArrayList<>();
+
+        return models;
+    }
 
     @Override
     public void onLoad()
