@@ -1,7 +1,8 @@
 package com.openrubicon.economics;
 
 import com.openrubicon.core.RRPGCore;
-import com.openrubicon.core.database.interfaces.DatabaseModel;
+import com.openrubicon.core.api.command.Command;
+import com.openrubicon.core.api.database.interfaces.DatabaseModel;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.openrubicon.core.interfaces.Module;
 
@@ -9,11 +10,15 @@ import java.util.ArrayList;
 
 public class RRPGEconomics extends JavaPlugin implements Module {
 
+
     @Override
     public ArrayList<DatabaseModel> getDatabaseModels() {
-        ArrayList<DatabaseModel> models = new ArrayList<>();
+        return new ArrayList<>();
+    }
 
-        return models;
+    @Override
+    public ArrayList<Command> getCommands() {
+        return new ArrayList<>();
     }
 
     @Override
