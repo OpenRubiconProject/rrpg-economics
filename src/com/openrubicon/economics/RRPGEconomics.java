@@ -6,6 +6,8 @@ import com.openrubicon.core.api.database.interfaces.PostDatabaseLoad;
 import com.openrubicon.economics.classes.Economy;
 import com.openrubicon.economics.database.models.AccountModel;
 import com.openrubicon.economics.database.models.TransactionModel;
+import com.openrubicon.core.api.command.Command;
+import com.openrubicon.core.api.database.interfaces.DatabaseModel;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.openrubicon.core.interfaces.Module;
 
@@ -26,6 +28,11 @@ public class RRPGEconomics extends JavaPlugin implements Module {
         models.add(new AccountModel());
         models.add(new TransactionModel());
         return models;
+    }
+
+    @Override
+    public ArrayList<Command> getCommands() {
+        return new ArrayList<>();
     }
 
     @Override
