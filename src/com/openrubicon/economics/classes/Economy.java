@@ -2,13 +2,10 @@ package com.openrubicon.economics.classes;
 
 import com.Acrobot.ChestShop.Events.TransactionEvent;
 import com.openrubicon.core.api.database.interfaces.PostDatabaseLoad;
+import com.openrubicon.core.api.vault.economy.EconomyResponse;
 import com.openrubicon.economics.RRPGEconomics;
-import com.openrubicon.economics.classes.PlayerAccount;
-import com.openrubicon.economics.classes.Transaction;
 import com.openrubicon.economics.database.models.AccountModel;
 import com.openrubicon.economics.database.models.TransactionModel;
-import net.milkbowl.vault.economy.AbstractEconomy;
-import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Sign;
@@ -17,15 +14,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class Economy extends AbstractEconomy implements PostDatabaseLoad
+public class Economy extends com.openrubicon.core.api.vault.economy.Economy implements PostDatabaseLoad
 {
 
     private static final Logger log = Logger.getLogger("Minecraft");
