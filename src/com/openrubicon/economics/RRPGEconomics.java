@@ -3,11 +3,9 @@ package com.openrubicon.economics;
 import com.openrubicon.core.RRPGCore;
 import com.openrubicon.core.api.database.interfaces.DatabaseModel;
 import com.openrubicon.core.api.database.interfaces.PostDatabaseLoad;
-import com.openrubicon.economics.classes.Economy;
 import com.openrubicon.economics.database.models.AccountModel;
 import com.openrubicon.economics.database.models.TransactionModel;
 import com.openrubicon.core.api.command.Command;
-import com.openrubicon.core.api.database.interfaces.DatabaseModel;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.openrubicon.core.interfaces.Module;
 
