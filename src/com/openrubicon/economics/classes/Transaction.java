@@ -1,6 +1,7 @@
 package com.openrubicon.economics.classes;
 
 
+import com.openrubicon.core.RRPGCore;
 import com.openrubicon.economics.database.models.TransactionModel;
 import com.openrubicon.economics.events.TransactionEvent;
 import org.bukkit.Bukkit;
@@ -27,11 +28,21 @@ public class Transaction {
     /**
      *
      * @param name Name of player recieving
-     * @param from
      * @param amount
      * @param reason
      * @param date
      */
+    public Transaction(OfflinePlayer name, double amount, String reason, Date date)
+    {
+        decreasedPlayer = name;
+        transactionAmount = amount;
+        comment = reason;
+        Timestamp = date;
+
+        Event event = new TransactionEvent(this);
+        Bukkit.getPluginManager().callEvent(event);
+    }
+
     public Transaction(OfflinePlayer name, OfflinePlayer from, double amount, String reason, Date date){
         decreasedPlayer = name;
         increasedPlayer = from;
@@ -44,6 +55,9 @@ public class Transaction {
     }
 
     public Transaction(TransactionModel t){
+        //The onTransactionEvent will not be called when loading from a transaction model.
+        //This is because the transaction already exists if you are loading it from a model.
+
         this.decreasedPlayer = Bukkit.getOfflinePlayer(t.getDecreasedUuid());
         this.increasedPlayer = Bukkit.getOfflinePlayer(t.getIncreasedUuid());
         this.transactionAmount = t.getAmount();

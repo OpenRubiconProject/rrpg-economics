@@ -1,12 +1,17 @@
 package com.openrubicon.economics.classes;
 
+import com.Acrobot.ChestShop.Events.TransactionEvent;
 import com.openrubicon.core.api.database.interfaces.PostDatabaseLoad;
+import com.openrubicon.core.api.events.Event;
 import com.openrubicon.core.api.vault.economy.EconomyResponse;
 import com.openrubicon.economics.RRPGEconomics;
 import com.openrubicon.economics.database.models.AccountModel;
+import com.openrubicon.economics.database.models.TransactionModel;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -14,10 +19,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static com.openrubicon.core.RRPGCore.plugin;
 
@@ -57,38 +59,39 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         }
     }
 
-//    public class TransactionEventListener implements Listener{
-//        @EventHandler
-//        public void onTransactionEvent(com.Acrobot.ChestShop.Events.TransactionEvent e){
-//            //ADD TO TRANSACTION HISTORY HERE
-//
-//            Sign s = e.getSign();
-//            Double amount = e.getPrice();
-//            String clientReason = "selling";
-//            String ownerReason = "buying";
-//            if(e.getTransactionType() == TransactionEvent.TransactionType.BUY){
-//                amount = amount * -1;
-//                clientReason = "buying";
-//                ownerReason = "selling";
-//            }
-//            clientReason += " " + e.getSign().getLine(1) + " " + e.getSign().getLine(3);
-//            ownerReason += " " + e.getSign().getLine(1) + " " + e.getSign().getLine(3);
-//
-//            Double divisor = Math.pow(10, Economics.vaultEconomy.fractionalDigits());
-//            Double d = new Double((Math.round(amount * divisor) / divisor));
-//
-//            Transaction t = new Transaction(e.getClient().getUniqueId().toString(), e.getOwner().getUniqueId().toString(), d, clientReason, new Date());
-//
-//            accountHash.get(e.getClient().getUniqueId().toString()).addTransaction(t);
-//            accountHash.get(e.getOwner().getUniqueId().toString()).addTransaction(t);
-//            Economics.dbManager.useTransactions().InsertInto(t);
-//            return;
-//        }
-//
-//        public TransactionEventListener(){
-//            Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
-//        }
-//    }
+    public class TransactionEventListener extends Event implements Listener{
+
+        @EventHandler
+        public void onTransactionEvent(com.Acrobot.ChestShop.Events.TransactionEvent e){
+            //ADD TO TRANSACTION HISTORY HERE
+
+            Sign s = e.getSign();
+            Double amount = e.getPrice();
+            String clientReason = "selling";
+            String ownerReason = "buying";
+            if(e.getTransactionType() == TransactionEvent.TransactionType.BUY){
+                amount = amount * -1;
+                clientReason = "buying";
+                ownerReason = "selling";
+            }
+            clientReason += " " + e.getSign().getLine(1) + " " + e.getSign().getLine(3);
+            ownerReason += " " + e.getSign().getLine(1) + " " + e.getSign().getLine(3);
+
+            Double divisor = Math.pow(10, RRPGEconomics.economy.fractionalDigits());
+            Double d = new Double((Math.round(amount * divisor) / divisor));
+
+            //Fires the event handler for a new transaction event
+            Transaction t = new Transaction(e.getClient(), e.getOwner(), d, clientReason, new Date());
+
+            accountHash.get(e.getClient().getUniqueId().toString()).addTransaction(t);
+            accountHash.get(e.getOwner().getUniqueId().toString()).addTransaction(t);
+            return;
+        }
+
+        public TransactionEventListener(){
+            Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
+        }
+    }
 
     @Override
     public boolean createPlayerAccount(OfflinePlayer player) {
@@ -279,6 +282,12 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         am.setUuid(p.getUniqueId().toString());
         am.getAccount();
         return am;
+    }
+
+    public PlayerAccount getAccount(OfflinePlayer p){
+        if(accountHash.containsKey(p))
+            return accountHash.get(p);
+        else return null;
     }
 
 

@@ -58,33 +58,33 @@ public class PlayerAccount{
         return user;
     }
 
-    public void displayTransactions(OfflinePlayer thePlayer, int page){
+    public void displayTransactions(int page){
 
         //Throw and event.
         Event event = new PlayerViewHistory(this, page);
         Bukkit.getPluginManager().callEvent(event);
 
         //get the most recent transactions for the player.
-        populateTransactions(thePlayer);
+        populateTransactions();
 
-        ArrayList<TransactionModel> results = new TransactionModel().getAccountTransactions(thePlayer);
+        ArrayList<TransactionModel> results = new TransactionModel().getAccountTransactions(user);
         int totalTransactions = results.size();
 
         if (transactionHistory.size() == 0){
-            Bukkit.getPlayer(thePlayer.getName()).sendMessage("Page 0 of 0");
-            Bukkit.getPlayer(thePlayer.getName()).sendMessage("No recent transactions.");
+            Bukkit.getPlayer(user.getName()).sendMessage("Page 0 of 0");
+            Bukkit.getPlayer(user.getName()).sendMessage("No recent transactions.");
             return;
         } else {
             int totalpages = (int)Math.ceil(new Double((totalTransactions / 10)));
             if (page > totalpages){
                 return;
             }
-            Bukkit.getPlayer(thePlayer.getName()).sendMessage("Page " + page + " of " + totalpages);
+            Bukkit.getPlayer(user.getName()).sendMessage("Page " + page + " of " + totalpages);
         }
 
         //If the transactions required are not in the queue, load them from the database)
         if((transactionHistory.size() == capacity) && (page > 2)){
-            loadTransactions(thePlayer, results, page, totalTransactions);
+            loadTransactions(results, page, totalTransactions);
             return;
         }
 
@@ -98,7 +98,7 @@ public class PlayerAccount{
         //Stack<TransactionModel> output = new Stack<TransactionModel>();
         for (Transaction history : transactionHistory) {
             if (i >= start && i <= stop) {
-                Bukkit.getPlayer(thePlayer.getName()).sendMessage((count) + ". " + history.showTransaction(thePlayer));
+                Bukkit.getPlayer(user.getName()).sendMessage((count) + ". " + history.showTransaction(user));
                 count--;
                 //output.add(history);
             }
@@ -106,7 +106,7 @@ public class PlayerAccount{
         }
     }
 
-    public void loadTransactions(OfflinePlayer thePlayer, ArrayList<TransactionModel> results, int page, int totalresults){
+    public void loadTransactions(ArrayList<TransactionModel> results, int page, int totalresults){
 
         //set the iterator to loop through the transactions
         int stop = totalresults - (resultsPerPage * (page - 1));
@@ -115,7 +115,7 @@ public class PlayerAccount{
 
         for(int i=stop; i>start; i--){
             Transaction t = new Transaction(results.get(i));
-            Bukkit.getPlayer(thePlayer.getName()).sendMessage((i)+". " + t.showTransaction(thePlayer));
+            Bukkit.getPlayer(user.getName()).sendMessage((i)+". " + t.showTransaction(user));
         }
     }
 
@@ -128,10 +128,10 @@ public class PlayerAccount{
         transactionHistory.add(transaction);
     }
 
-    public void populateTransactions(OfflinePlayer thePlayer){
+    public void populateTransactions(){
 
         //Check the database for the transaction history of this account.
-        ArrayList<TransactionModel> r = new TransactionModel().getAccountTransactions(thePlayer);
+        ArrayList<TransactionModel> r = new TransactionModel().getAccountTransactions(user);
 
         for(int i=r.size(); i>r.size() - 20; i--){
             Transaction t = new Transaction(r.get(i));
