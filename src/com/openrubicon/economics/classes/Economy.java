@@ -6,19 +6,14 @@ import com.openrubicon.core.api.events.Event;
 import com.openrubicon.core.api.vault.economy.EconomyResponse;
 import com.openrubicon.economics.RRPGEconomics;
 import com.openrubicon.economics.database.models.AccountModel;
-import com.openrubicon.economics.database.models.TransactionModel;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 import static com.openrubicon.core.RRPGCore.plugin;
@@ -34,21 +29,22 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
 
     @Override
     public void run() {
-        //Create an economy listener to register economy event handlers.
+        //Register Economy Events
         new EconomyServerListener();
-        //new TransactionEventListener();
+        new TransactionEventListener();
 
-        //Load database entries into the table on restarts
+        //Load database entries into the hash map on load.
         loadHashMap();
-
     }
 
+    //Economy Listener to create accounts for players when joining the server.
     public class EconomyServerListener implements Listener {
 
         @EventHandler
         public void onPlayerJoin(PlayerJoinEvent event){
-            OfflinePlayer player = event.getPlayer();
+
             //When a player joins the server, if they don't have an account, make them an account
+            OfflinePlayer player = event.getPlayer();
             if(!hasAccount(player)){
                 createPlayerAccount(player);
             }
@@ -59,12 +55,12 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         }
     }
 
+    //Chest Shop Event listener to add Transactions when a chest shop event occurs.
     public class TransactionEventListener extends Event implements Listener{
+
 
         @EventHandler
         public void onTransactionEvent(com.Acrobot.ChestShop.Events.TransactionEvent e){
-            //ADD TO TRANSACTION HISTORY HERE
-
             Sign s = e.getSign();
             Double amount = e.getPrice();
             String clientReason = "selling";
@@ -74,6 +70,8 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
                 clientReason = "buying";
                 ownerReason = "selling";
             }
+
+            //Append the quantity and the item name to the reason of the transaction
             clientReason += " " + e.getSign().getLine(1) + " " + e.getSign().getLine(3);
             ownerReason += " " + e.getSign().getLine(1) + " " + e.getSign().getLine(3);
 
@@ -93,6 +91,11 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         }
     }
 
+    /**
+     * Creates a player account for the OfflinePlayer specified.
+     * @param player    OfflinePlayer to create the account for
+     * @return          If the account was successfully created or not
+     */
     @Override
     public boolean createPlayerAccount(OfflinePlayer player) {
         //If the player has never played before but the player is now online, make them an account
@@ -124,11 +127,19 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         return false;
     }
 
+    /**
+     * Withdraws a specified amount of money from a player's account.
+     * @param player    The account to withdraw money from
+     * @param amount    The amount of money to withdraw
+     * @return          If the Economy successfully performed the withdraw.
+     */
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer player, double amount) {
-
+        //Check if the player has an account
         if(hasAccount(player)){
+            //Check if the account has enough money
             if(has(player, amount)){
+
                 //Withdraw from the account
                 accountHash.get(player).alterAccount(-1 * amount);
 
@@ -149,10 +160,15 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         return EconomyResponse.Failure(player.getName() + " does not have an account.");
     }
 
+    /**
+     * Deposits a specified amount of money into a player's account
+     * @param player    The account to deposit money into
+     * @param amount    The amount of money to deposit
+     * @return          If the Economy successfully performed the deposit
+     */
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer player, double amount) {
-
-        String uuid = player.getUniqueId().toString();
+        //Check if the player has an account
         if(hasAccount(player)){
             //Deposit to the account
             accountHash.get(player).alterAccount(1 * amount);
@@ -166,23 +182,34 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
             } else {
                 //Undo if the database cannot update
                 accountHash.get(player).alterAccount(-1 * amount);
+                EconomyResponse.Failure("SQL Error");
             }
-
         }
         return EconomyResponse.Failure(player.getName() + " does not have an account.");
     }
 
+    /**
+     * Returns a list of the banks that exist
+     * @return  A list of strings of the bank names
+     */
     @Override
     public List<String> getBanks() {
         return null;
     }
 
+    /**
+     * Gets the balance of the player's account
+     * @param player    The desired player's balance
+     * @return          The balance of the player's account
+     */
     @Override
     public double getBalance(OfflinePlayer player) {
-        Bukkit.getLogger().info(accountHash.size() + " entires in the hash map.");
-        accountHash.forEach((key, value) -> {
-            Bukkit.getLogger().info("uuid : " + key + " Account : " + value);
-        });
+        //Message for debugging.
+//        Bukkit.getLogger().info(accountHash.size() + " entires in the hash map.");
+//        accountHash.forEach((key, value) ->
+//        {
+//            Bukkit.getLogger().info("uuid : " + key + " Account : " + value);
+//        });
 
         //Check if the user has played on the server.
         if (player.hasPlayedBefore()){
@@ -204,6 +231,12 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         return 0;
     }
 
+    /**
+     * Checks if the specified player has enough money in their account
+     * @param player    The desired player's account
+     * @param amount    The amount of money to check their account for
+     * @return          If the player has more than the stated amount of money
+     */
     @Override
     public boolean has(OfflinePlayer player, double amount) {
         if (player.hasPlayedBefore()) {
@@ -217,41 +250,75 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         return false;
     }
 
+    /**
+     * Checks if the economy is enabled
+     * @return  If the economy is enabled
+     */
     @Override
     public boolean isEnabled() {
         return true;
     }
 
+    /**
+     * Gets the name of the economy
+     * @return  The name of the economy
+     */
     @Override
     public String getName() {
         return name;
     }
 
+    /**
+     * Checks if the economy supports banks
+     * @return  If the economy supports banks
+     */
     @Override
     public boolean hasBankSupport() {
         return false;
     }
 
+    /**
+     * Determines the number of digits in the currency for the economy
+     * @return  The number of digits for the currency
+     */
     @Override
     public int fractionalDigits() {
         return 2;
     }
 
+    /**
+     * The format of the currency when displaying to the player
+     * @param v     The amount of money that is being displayed
+     * @return      The format of the currency
+     */
     @Override
     public String format(double v) {
         return v + "r";
     }
 
+    /**
+     * Returns the plural name of the currency
+     * @return  The plural name of the currency
+     */
     @Override
     public String currencyNamePlural() {
         return "Rubies";
     }
 
+    /**
+     * Returns the singular name of the currency
+     * @return  The singular name of the currency
+     */
     @Override
     public String currencyNameSingular() {
         return "Ruby";
     }
 
+    /**
+     * Chcks if the specified player has an account
+     * @param offlinePlayer The player to check for an account
+     * @return              If the player has an account
+     */
     @Override
     public boolean hasAccount(OfflinePlayer offlinePlayer) {
         return false;
@@ -268,6 +335,11 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         }
     }
 
+    /**
+     * Checks if the specified player has an account in the database
+     * @param p     The player to check for an account in the database
+     * @return      If the player has an account in the database
+     */
     private boolean existsInDatabase(OfflinePlayer p){
         AccountModel am = new AccountModel();
         am.setName(p.getName());
@@ -275,8 +347,12 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         return am.existsInDb();
     }
 
+    /**
+     * Obtains a player's account from the database
+     * @param p     The player's account to retreieve from the database/
+     * @return      The AccountModel of the player's database entry
+     */
     private AccountModel getFromDatabase(OfflinePlayer p){
-
         AccountModel am = new AccountModel();
         am.setName(p.getName());
         am.setUuid(p.getUniqueId().toString());
@@ -284,6 +360,11 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         return am;
     }
 
+    /**
+     * Obtains the PlayerAccount for the specified player
+     * @param p     The player's account to retrieve
+     * @return      The PlayerAccount of the specified player
+     */
     public PlayerAccount getAccount(OfflinePlayer p){
         if(accountHash.containsKey(p))
             return accountHash.get(p);

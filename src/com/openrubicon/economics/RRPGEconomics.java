@@ -24,6 +24,7 @@ public class RRPGEconomics extends JavaPlugin implements Module {
 
     @Override
     public ArrayList<DatabaseModel> getDatabaseModels() {
+        //Create an array list of Database models that need to be loaded in Core
         ArrayList<DatabaseModel> models = new ArrayList<>();
         models.add(new AccountModel());
         models.add(new TransactionModel());
@@ -32,6 +33,7 @@ public class RRPGEconomics extends JavaPlugin implements Module {
 
     @Override
     public ArrayList<Command> getCommands() {
+        //Create an array list of commands that need to be implemented in Core
         ArrayList<Command> commands = new ArrayList<Command>();
         commands.add(new Bal());
         commands.add(new Give());
@@ -43,6 +45,7 @@ public class RRPGEconomics extends JavaPlugin implements Module {
 
     @Override
     public ArrayList<PostDatabaseLoad> getPostDatabaseLoads() {
+        //Get a list of classes that need to be loaded after the database is loaded into the plugin.
         ArrayList<PostDatabaseLoad> loads = new ArrayList<>();
         loads.add(economy);
         return loads;
