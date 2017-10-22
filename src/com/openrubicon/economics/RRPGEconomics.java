@@ -4,6 +4,7 @@ import com.openrubicon.core.RRPGCore;
 import com.openrubicon.core.api.database.interfaces.DatabaseModel;
 import com.openrubicon.core.api.database.interfaces.PostDatabaseLoad;
 import com.openrubicon.economics.classes.Economy;
+import com.openrubicon.economics.commands.*;
 import com.openrubicon.economics.database.models.AccountModel;
 import com.openrubicon.economics.database.models.TransactionModel;
 import com.openrubicon.core.api.command.Command;
@@ -31,7 +32,13 @@ public class RRPGEconomics extends JavaPlugin implements Module {
 
     @Override
     public ArrayList<Command> getCommands() {
-        return new ArrayList<>();
+        ArrayList<Command> commands = new ArrayList<Command>();
+        commands.add(new Bal());
+        commands.add(new Give());
+        commands.add(new Pay());
+        commands.add(new Take());
+        commands.add(new Transactions());
+        return commands;
     }
 
     @Override
