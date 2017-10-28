@@ -1,7 +1,6 @@
 package com.openrubicon.economics.classes;
 
 import com.google.common.collect.EvictingQueue;
-import com.openrubicon.economics.classes.Transaction;
 import com.openrubicon.economics.database.models.AccountModel;
 import com.openrubicon.economics.database.models.TransactionModel;
 import com.openrubicon.economics.events.PlayerViewHistory;
@@ -10,9 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Queue;
 
@@ -46,45 +42,61 @@ public class PlayerAccount{
         this.balance = balance;
     }
 
+    /**
+     * Add or remove from a player's balance
+     * @param change    The amount to change the player's balance by
+     */
     public void alterAccount(double change){
         balance += change;
     }
 
+    /**
+     * Returns the balance of the account
+     * @return  The balance of the account
+     */
     public double getBalance(){
         return balance;
     }
 
+    /**
+     * Returns the player who ows the account
+     * @return  The owner of the account
+     */
     public OfflinePlayer getUser(){
         return user;
     }
 
-    public void displayTransactions(OfflinePlayer thePlayer, int page){
+    /**
+     * Shows a page of the player's transaction history
+     * @param page  The desired page to show
+     */
+    public void displayTransactions(int page){
 
-        //Throw and event.
+        //Throw an event.
         Event event = new PlayerViewHistory(this, page);
         Bukkit.getPluginManager().callEvent(event);
 
         //get the most recent transactions for the player.
-        populateTransactions(thePlayer);
+        populateTransactions();
 
-        ArrayList<TransactionModel> results = new TransactionModel().getAccountTransactions(thePlayer);
+        ArrayList<TransactionModel> results = new TransactionModel().getAccountTransactions(user);
         int totalTransactions = results.size();
 
         if (transactionHistory.size() == 0){
-            Bukkit.getPlayer(thePlayer.getName()).sendMessage("Page 0 of 0");
-            Bukkit.getPlayer(thePlayer.getName()).sendMessage("No recent transactions.");
+            Bukkit.getPlayer(user.getName()).sendMessage("Page 0 of 0");
+            Bukkit.getPlayer(user.getName()).sendMessage("No recent transactions.");
             return;
         } else {
             int totalpages = (int)Math.ceil(new Double((totalTransactions / 10)));
             if (page > totalpages){
                 return;
             }
-            Bukkit.getPlayer(thePlayer.getName()).sendMessage("Page " + page + " of " + totalpages);
+            Bukkit.getPlayer(user.getName()).sendMessage("Page " + page + " of " + totalpages);
         }
 
         //If the transactions required are not in the queue, load them from the database)
         if((transactionHistory.size() == capacity) && (page > 2)){
-            loadTransactions(thePlayer, results, page, totalTransactions);
+            loadTransactions(results, page, totalTransactions);
             return;
         }
 
@@ -98,7 +110,7 @@ public class PlayerAccount{
         //Stack<TransactionModel> output = new Stack<TransactionModel>();
         for (Transaction history : transactionHistory) {
             if (i >= start && i <= stop) {
-                Bukkit.getPlayer(thePlayer.getName()).sendMessage((count) + ". " + history.showTransaction(thePlayer));
+                Bukkit.getPlayer(user.getName()).sendMessage((count) + ". " + history.showTransaction(user));
                 count--;
                 //output.add(history);
             }
@@ -106,7 +118,14 @@ public class PlayerAccount{
         }
     }
 
-    public void loadTransactions(OfflinePlayer thePlayer, ArrayList<TransactionModel> results, int page, int totalresults){
+    /**
+     * A helper function for the displayTransactions function. If the player is requesting a list of transactions that are not in
+     * the queue, this function will load the required transactions from the database.
+     * @param results   The transaction results to load
+     * @param page      The page number requested
+     * @param totalresults  The total number of transactions that the player has
+     */
+    private void loadTransactions(ArrayList<TransactionModel> results, int page, int totalresults){
 
         //set the iterator to loop through the transactions
         int stop = totalresults - (resultsPerPage * (page - 1));
@@ -115,23 +134,34 @@ public class PlayerAccount{
 
         for(int i=stop; i>start; i--){
             Transaction t = new Transaction(results.get(i));
-            Bukkit.getPlayer(thePlayer.getName()).sendMessage((i)+". " + t.showTransaction(thePlayer));
+            Bukkit.getPlayer(user.getName()).sendMessage((i)+". " + t.showTransaction(user));
         }
     }
 
+    /**
+     * Gets the balance conforming to the economy's decimal places
+     * @return  The balance of the account with the economy's decimal places.
+     */
     public Double getRoundedBalance(){
         Double divisor = Math.pow(10, RRPGEconomics.economy.fractionalDigits());
         return new Double((Math.round(balance * divisor) / divisor));
     }
 
+    /**
+     * Adds a transaction to the player's transaction history
+     * @param transaction   The transaction to add to the player's history
+     */
     public void addTransaction(Transaction transaction){
         transactionHistory.add(transaction);
     }
 
-    public void populateTransactions(OfflinePlayer thePlayer){
+    /**
+     * Loads the 20 most recent transactions by the player into the transaction queue
+     */
+    public void populateTransactions(){
 
         //Check the database for the transaction history of this account.
-        ArrayList<TransactionModel> r = new TransactionModel().getAccountTransactions(thePlayer);
+        ArrayList<TransactionModel> r = new TransactionModel().getAccountTransactions(user);
 
         for(int i=r.size(); i>r.size() - 20; i--){
             Transaction t = new Transaction(r.get(i));

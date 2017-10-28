@@ -95,20 +95,25 @@ public class TransactionModel extends DatabaseModel<TransactionModel> {
         this.version = version;
     }
 
-
+    /**
+     * Inserts a new transaction into the database table
+     * @return true
+     */
     public boolean insertInto(){
         this.timestamp = new Date();
         this.insert("decreasedUuid, increasedUuid, amount, comment, timestamp", ":decreasedUuid, :increasedUuid, :amount, :comment, :timestamp").executeInsert();
         return true;
     }
 
+    /**
+     * Gets an arraylist of all transactions that the specified account has participated in.
+     * @param p     The player to get transactions for
+     * @return      ArrayList of transactionModels where player p was involved
+     */
     public ArrayList<TransactionModel> getAccountTransactions(OfflinePlayer p){
         this.setDecreasedUuid(p.getUniqueId().toString());
         return (ArrayList<TransactionModel>) this.select("*").where("decreased_uuid = :decreased_uuid OR increased_uuid = :decreased_uuid").executeFetch(TransactionModel.class);
     }
-
-
-
 
     @Override
     public HashMap<Integer, DatabaseMigration> getMigrations() {

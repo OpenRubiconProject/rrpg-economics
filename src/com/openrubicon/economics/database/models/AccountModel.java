@@ -67,21 +67,37 @@ public class AccountModel extends DatabaseModel<AccountModel> {
         this.id = id;
     }
 
+    /**
+     * Inserts the current account model into the datqabase as a new entry
+     * @return  true
+     */
     public boolean insertInto(){
         this.insert("uuid, name, bal, created_at, updated_at", ":uuid, :name, :bal, :created_at, :updated_at").executeInsert();
         return true;
     }
 
+    /**
+     * Updates the current account model in the database
+     * @return true
+     */
     public boolean updateModel() {
         this.update().set("uuid, name, bal, created_at, updated_at", ":uuid, :name, :bal, :created_at, :updated_at").executeUpdate();
         return true;
     }
 
+    /**
+     * Gets the account from the database using the name specified
+     * @return true
+     */
     public boolean getAccount(){
         this.select("*").where("uuid = :uuid, name = :name").executeFetch(this.getClass());
         return true;
     }
 
+    /**
+     * Checks if the account exists in the database
+     * @return if the account exists in the database
+     */
     public boolean existsInDb(){
         if(this.count("id").where("uuid = :uuid, name = :name").executeCount() == 1)
             return true;
