@@ -6,16 +6,12 @@ import com.openrubicon.economics.RRPGEconomics;
 import com.openrubicon.economics.database.models.AccountModel;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -214,37 +210,30 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         return false;
     }
 
-    @Override
     public boolean isEnabled() {
         return true;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public boolean hasBankSupport() {
         return false;
     }
 
-    @Override
     public int fractionalDigits() {
         return 2;
     }
 
-    @Override
     public String format(double v) {
         return v + "r";
     }
 
-    @Override
     public String currencyNamePlural() {
         return "Rubies";
     }
 
-    @Override
     public String currencyNameSingular() {
         return "Ruby";
     }
