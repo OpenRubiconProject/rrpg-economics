@@ -3,6 +3,7 @@ package com.openrubicon.economics.database.models;
 import com.openrubicon.core.api.database.DatabaseModel;
 import com.openrubicon.core.api.database.interfaces.DatabaseMigration;
 import com.openrubicon.economics.classes.Transaction;
+import com.openrubicon.economics.database.migrations.CreateTransaction;
 import org.bukkit.OfflinePlayer;
 
 import java.util.ArrayList;
@@ -117,7 +118,9 @@ public class TransactionModel extends DatabaseModel<TransactionModel> {
 
     @Override
     public HashMap<Integer, DatabaseMigration> getMigrations() {
-        return null;
+        HashMap<Integer, DatabaseMigration> migrations = new HashMap<>();
+        migrations.put(1, new CreateTransaction());
+        return migrations;
     }
 
     @Override

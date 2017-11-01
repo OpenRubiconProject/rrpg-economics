@@ -3,6 +3,8 @@ package com.openrubicon.economics.database.models;
 import com.openrubicon.core.api.database.DatabaseModel;
 import com.openrubicon.core.api.database.interfaces.DatabaseMigration;
 import com.openrubicon.economics.classes.PlayerAccount;
+import com.openrubicon.economics.database.migrations.CreateAccount;
+import com.openrubicon.economics.database.migrations.UpdateAccountsAddDates;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -21,7 +23,7 @@ public class AccountModel extends DatabaseModel<AccountModel> {
     private Date deleted_at;
 
     private String tablename = "rubicon_economics_account";
-    private int version = 1;
+    private int version = 2;
 
 
     public AccountModel() {
@@ -106,7 +108,10 @@ public class AccountModel extends DatabaseModel<AccountModel> {
 
     @Override
     public HashMap<Integer, DatabaseMigration> getMigrations() {
-        return null;
+        HashMap<Integer, DatabaseMigration> migrations = new HashMap<>();
+        migrations.put(1, new CreateAccount());
+        migrations.put(2, new UpdateAccountsAddDates());
+        return migrations;
     }
 
     @Override
