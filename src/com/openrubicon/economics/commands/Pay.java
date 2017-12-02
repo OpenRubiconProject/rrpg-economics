@@ -4,8 +4,8 @@ import com.openrubicon.core.api.command.Command;
 import com.openrubicon.core.api.interactables.Player;
 import com.openrubicon.core.api.interactables.enums.InteractableType;
 import com.openrubicon.core.api.interactables.interfaces.Interactable;
+import com.openrubicon.core.api.utility.DynamicPrimitive;
 import com.openrubicon.economics.RRPGEconomics;
-import com.openrubicon.economics.classes.Economy;
 import com.openrubicon.economics.classes.Transaction;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -13,9 +13,6 @@ import org.bukkit.ChatColor;
 import java.util.ArrayList;
 import java.util.Date;
 
-/**
- * Created by Quinn on 10/21/2017.
- */
 public class Pay extends Command {
     @Override
     public String getCommandFormat() {
@@ -30,38 +27,38 @@ public class Pay extends Command {
     }
 
     @Override
-    public void handle(Interactable interactable, String[] strings) {
+    public void handle(Interactable interactable, ArrayList<DynamicPrimitive> args) {
 
         //Args:
         //[0] targetPlayer
         //[1] amount
 
-        if(strings.length != 2)
+        if(args.size() != 2)
         {
 
             ((Player)interactable).getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',"&2Incorrect syntax for /money pay"));
             return;
         }
 
-        if(Bukkit.getPlayer(strings[0]) == null)
+        if(Bukkit.getPlayer(args.get(0).getString()) == null)
         {
             ((Player)interactable).getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',"&2That player does not exist!"));
             return;
         }
 
-        if (!RRPGEconomics.economy.hasAccount(((Player)interactable).getPlayer()) || !RRPGEconomics.economy.hasAccount(Bukkit.getPlayer(strings[0])))
+        if (!RRPGEconomics.economy.hasAccount(((Player)interactable).getPlayer()) || !RRPGEconomics.economy.hasAccount(Bukkit.getPlayer(args.get(0).getString())))
         {
             ((Player)interactable).getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',"&2That player does not exist!"));
             return;
         }
 
-        if (Double.parseDouble(strings[1]) <= 0)
+        if (args.get(1).getDouble() <= 0)
         {
             ((Player)interactable).getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',"&2Invalid payment amount."));
             return;
         }
 
-        Double amount = Double.parseDouble(strings[1]);
+        Double amount = args.get(1).getDouble();
 
         if (!RRPGEconomics.economy.has(((Player)interactable).getPlayer(), amount))
         {
@@ -70,17 +67,17 @@ public class Pay extends Command {
         }
 
         RRPGEconomics.economy.withdrawPlayer(((Player)interactable).getPlayer(), amount);
-        RRPGEconomics.economy.depositPlayer(Bukkit.getPlayer(strings[0]), amount);
-        ((Player)interactable).getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',"&2Paid " + strings[0] + " " + amount + RRPGEconomics.economy.currencyNamePlural()));
-        if (Bukkit.getPlayer(strings[0]).isOnline()){
-            Bukkit.getPlayer(strings[0]).sendMessage(ChatColor.translateAlternateColorCodes('&',"&2Recieved " + amount + RRPGEconomics.economy.currencyNamePlural() + " from " + ((Player)interactable).getPlayer().getName()));
+        RRPGEconomics.economy.depositPlayer(Bukkit.getPlayer(args.get(0).getString()), amount);
+        ((Player)interactable).getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',"&2Paid " + args.get(0) + " " + amount + RRPGEconomics.economy.currencyNamePlural()));
+        if (Bukkit.getPlayer(args.get(0).getString()).isOnline()){
+            Bukkit.getPlayer(args.get(0).getString()).sendMessage(ChatColor.translateAlternateColorCodes('&',"&2Recieved " + amount + RRPGEconomics.economy.currencyNamePlural() + " from " + ((Player)interactable).getPlayer().getName()));
         }
         //ADD TO TRANSACTION HISTORY HERE
 
 
-        Transaction t = new Transaction(((Player)interactable).getPlayer(), Bukkit.getPlayer(strings[0]), amount, "payment", new Date());
+        Transaction t = new Transaction(((Player)interactable).getPlayer(), Bukkit.getPlayer(args.get(0).getString()), amount, "payment", new Date());
         RRPGEconomics.economy.getAccount(((Player)interactable).getPlayer()).addTransaction(t);
-        RRPGEconomics.economy.getAccount(Bukkit.getPlayer(strings[0])).addTransaction(t);
+        RRPGEconomics.economy.getAccount(Bukkit.getPlayer(args.get(0).getString())).addTransaction(t);
         return;
     }
 }
