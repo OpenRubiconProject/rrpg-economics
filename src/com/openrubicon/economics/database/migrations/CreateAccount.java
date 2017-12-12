@@ -15,9 +15,9 @@ public class CreateAccount implements DatabaseMigration {
                 " `uuid` varchar(64) NOT NULL,\n" +
                 " `name` varchar(255) NOT NULL,\n" +
                 " `bal` double(50,5) NOT NULL DEFAULT '0.00000',\n" +
-                " `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n" +
-                " `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n" +
-                " `deleted_at` datetime DEFAULT NULL,\n" +
+                //" `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n" +
+                //" `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n" +
+                //" `deleted_at` datetime DEFAULT NULL,\n" +
                 " PRIMARY KEY (`id`)\n" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
         return true;
