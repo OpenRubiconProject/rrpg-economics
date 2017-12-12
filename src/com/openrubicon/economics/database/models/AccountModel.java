@@ -22,7 +22,7 @@ public class AccountModel extends DatabaseModel<AccountModel> {
     private Date updated_at;
     private Date deleted_at;
 
-    private String tablename = "rubicon_economics_account";
+    private String tablename = "rubicon_economics_accounts";
     private int version = 2;
 
 
