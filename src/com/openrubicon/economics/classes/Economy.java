@@ -107,9 +107,10 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
                 if(!accountHash.containsKey(player)) {
                     //Create a new account for them
                     PlayerAccount account = new PlayerAccount(player, 0.0);
+                    AccountModel am = new AccountModel(account);
 
                     //Attempt to save to database
-                    if(new AccountModel(account).insertInto()){
+                    if(am.insertInto()){
                         accountHash.put(player, account);
                         return true;
                     } else {

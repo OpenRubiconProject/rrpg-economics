@@ -5,6 +5,8 @@ import com.openrubicon.core.api.database.interfaces.DatabaseMigration;
 import com.openrubicon.economics.classes.PlayerAccount;
 import com.openrubicon.economics.database.migrations.CreateAccount;
 import com.openrubicon.economics.database.migrations.UpdateAccountsAddDates;
+import org.apache.commons.lang.ObjectUtils;
+import org.bukkit.Bukkit;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -27,6 +29,12 @@ public class AccountModel extends DatabaseModel<AccountModel> {
 
 
     public AccountModel() {
+        this.uuid = "";
+        this.name = "";
+        this.bal = 0;
+        this.created_at = new Date();
+        this.updated_at = new Date();
+        this.deleted_at = null;
     }
 
     public AccountModel(PlayerAccount pa){
@@ -35,6 +43,7 @@ public class AccountModel extends DatabaseModel<AccountModel> {
         this.bal = pa.getBalance();
         this.created_at = new Date();
         this.updated_at = new Date();
+        this.deleted_at = null;
     }
 
     public double getBal() {
@@ -92,7 +101,7 @@ public class AccountModel extends DatabaseModel<AccountModel> {
      * @return true
      */
     public boolean getAccount(){
-        this.select("*").where("uuid = :uuid, name = :name").executeFetch(this.getClass());
+        this.select("*").where("uuid = :uuid and name = :name").executeFetch(this.getClass());
         return true;
     }
 
@@ -101,7 +110,7 @@ public class AccountModel extends DatabaseModel<AccountModel> {
      * @return if the account exists in the database
      */
     public boolean existsInDb(){
-        if(this.count("id").where("uuid = :uuid, name = :name").executeCount() == 1)
+        if(this.count("id").where("uuid = :uuid and name = :name").executeCount() == 1)
             return true;
         return false;
     }
