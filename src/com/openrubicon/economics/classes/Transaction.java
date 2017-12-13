@@ -130,9 +130,9 @@ public class Transaction {
         String reportDate = df.format(Timestamp);
 
         if (thePlayer.equals(decreasedPlayer)) {
-            return "Sent " + abs(transactionAmount) + " to " + this.decreasedPlayer.getName().toString() + " for " + comment + " on " + reportDate;
+            return "Sent " + abs(transactionAmount) + " to " + this.decreasedPlayer.getPlayer().getName() + " for " + comment + " on " + reportDate;
         } else {
-            return "Recieved " + abs(transactionAmount) + " from " + this.increasedPlayer.getName().toString() + " for " + comment + " on " + reportDate;
+            return "Recieved " + abs(transactionAmount) + " from " + this.increasedPlayer.getPlayer().getName() + " for " + comment + " on " + reportDate;
         }
     }
 }
