@@ -98,9 +98,6 @@ public class PlayerAccount{
         int start = page * resultsPerPage;
         int stop = start + resultsPerPage + 1;
 
-        Bukkit.broadcastMessage("start:" + start);
-        Bukkit.broadcastMessage("stop:" + stop);
-
         int count = start + 1;
 
         //Stack<TransactionModel> output = new Stack<TransactionModel>();
