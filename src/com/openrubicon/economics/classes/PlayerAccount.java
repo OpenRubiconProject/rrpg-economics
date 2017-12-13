@@ -20,7 +20,7 @@ public class PlayerAccount{
     OfflinePlayer user;
     private String worldName;
     private int resultsPerPage = 10;
-    private int capacity = 20;
+    private int capacity = 100;
     private Queue<Transaction> transactionHistory = EvictingQueue.create(capacity);
     private double balance;
 
@@ -76,65 +76,41 @@ public class PlayerAccount{
         Event event = new PlayerViewHistory(this, page);
         Bukkit.getPluginManager().callEvent(event);
 
-        //get the most recent transactions for the player.
-        populateTransactions();
-
-        ArrayList<TransactionModel> results = new TransactionModel().getAccountTransactions(user);
-        int totalTransactions = results.size();
+        if(transactionHistory.size() == 0) {
+            //get the 100 most recent transactions for the player if not loaded.
+            populateTransactions();
+        }
 
         if (transactionHistory.size() == 0){
             Bukkit.getPlayer(user.getName()).sendMessage("Page 0 of 0");
             Bukkit.getPlayer(user.getName()).sendMessage("No recent transactions.");
             return;
         } else {
-            int totalpages = (int)Math.ceil(new Double((totalTransactions / 10)));
+            double totalpages = Math.ceil(new Double((transactionHistory.size() / 10.0f)));
             if (page > totalpages){
                 return;
             }
-            Bukkit.getPlayer(user.getName()).sendMessage("Page " + page + " of " + totalpages);
-        }
-
-        //If the transactions required are not in the queue, load them from the database)
-        if((transactionHistory.size() == capacity) && (page > 2)){
-            loadTransactions(results, page, totalTransactions);
-            return;
+            Bukkit.getPlayer(user.getName()).sendMessage("Page " + (page + 1) + " of " + (int)totalpages);
         }
 
         //set the iterator to loop through the transactions
         int i=0;
-        int stop = capacity - (resultsPerPage * (page - 1));
-        int start = stop - (resultsPerPage - 1);
+        int start = page * resultsPerPage;
+        int stop = start + resultsPerPage + 1;
 
-        int count= ((resultsPerPage * page) - 1);
+        Bukkit.broadcastMessage("start:" + start);
+        Bukkit.broadcastMessage("stop:" + stop);
+
+        int count = start + 1;
 
         //Stack<TransactionModel> output = new Stack<TransactionModel>();
         for (Transaction history : transactionHistory) {
-            if (i >= start && i <= stop) {
+            if (i >= start && i <= stop && i <= 100) {
                 Bukkit.getPlayer(user.getName()).sendMessage((count) + ". " + history.showTransaction(user));
-                count--;
+                count++;
                 //output.add(history);
             }
             i++;
-        }
-    }
-
-    /**
-     * A helper function for the displayTransactions function. If the player is requesting a list of transactions that are not in
-     * the queue, this function will load the required transactions from the database.
-     * @param results   The transaction results to load
-     * @param page      The page number requested
-     * @param totalresults  The total number of transactions that the player has
-     */
-    private void loadTransactions(ArrayList<TransactionModel> results, int page, int totalresults){
-
-        //set the iterator to loop through the transactions
-        int stop = totalresults - (resultsPerPage * (page - 1));
-        int start = stop - (resultsPerPage - 1);
-        //int i= ((resultsPerPage * page) - 1);
-
-        for(int i=stop; i>start; i--){
-            Transaction t = new Transaction(results.get(i));
-            Bukkit.getPlayer(user.getName()).sendMessage((i)+". " + t.showTransaction(user));
         }
     }
 
@@ -163,7 +139,7 @@ public class PlayerAccount{
         //Check the database for the transaction history of this account.
         ArrayList<TransactionModel> r = new TransactionModel().getAccountTransactions(user);
 
-        for(int i=r.size(); i>r.size() - 20; i--){
+        for(int i=(r.size() - 1); (i > r.size() - (capacity - 1)) && (i > 0); i--){
             Transaction t = new Transaction(r.get(i));
             transactionHistory.add(t);
         }

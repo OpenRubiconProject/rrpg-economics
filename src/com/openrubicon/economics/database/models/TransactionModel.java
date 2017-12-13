@@ -4,6 +4,7 @@ import com.openrubicon.core.api.database.DatabaseModel;
 import com.openrubicon.core.api.database.interfaces.DatabaseMigration;
 import com.openrubicon.economics.classes.Transaction;
 import com.openrubicon.economics.database.migrations.CreateTransaction;
+import com.openrubicon.economics.database.migrations.UpdateTransactionsAddDates;
 import org.bukkit.OfflinePlayer;
 
 import java.util.ArrayList;
@@ -21,9 +22,12 @@ public class TransactionModel extends DatabaseModel<TransactionModel> {
     private double amount;
     private String comment;
     private Date timestamp;
+    private Date created_at;
+    private Date updated_at;
+    private Date deleted_at;
 
     private String tablename = "rubicon_economics_transactions";
-    private int version = 1;
+    private int version = 2;
 
     public TransactionModel(Transaction t){
         decreasedUuid = t.getDecreasedPlayer().getUniqueId().toString();
@@ -92,6 +96,30 @@ public class TransactionModel extends DatabaseModel<TransactionModel> {
         this.tablename = tablename;
     }
 
+    public Date getCreated_at() {
+        return this.created_at;
+    }
+
+    public void setCreated_at(Date created) {
+        this.created_at = created;
+    }
+
+    public Date getUpdated_at() {
+        return this.updated_at;
+    }
+
+    public void setUpdated_at(Date updated) {
+        this.updated_at = updated;
+    }
+
+    public Date getDeleted_at() {
+        return this.deleted_at;
+    }
+
+    public void setDeleted_at(Date deleted) {
+        this.deleted_at = deleted;
+    }
+
     public void setVersion(int version) {
         this.version = version;
     }
@@ -113,13 +141,14 @@ public class TransactionModel extends DatabaseModel<TransactionModel> {
      */
     public ArrayList<TransactionModel> getAccountTransactions(OfflinePlayer p){
         this.setDecreasedUuid(p.getUniqueId().toString());
-        return (ArrayList<TransactionModel>) this.select("*").where("decreased_uuid = :decreased_uuid OR increased_uuid = :decreased_uuid").executeFetch(TransactionModel.class);
+        return (ArrayList<TransactionModel>) this.selectAll().where("decreasedUuid = :decreasedUuid OR increasedUuid = :decreasedUuid").executeFetch(TransactionModel.class);
     }
 
     @Override
     public HashMap<Integer, DatabaseMigration> getMigrations() {
         HashMap<Integer, DatabaseMigration> migrations = new HashMap<>();
         migrations.put(1, new CreateTransaction());
+        migrations.put(2, new UpdateTransactionsAddDates());
         return migrations;
     }
 

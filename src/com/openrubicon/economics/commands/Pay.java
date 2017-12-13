@@ -16,7 +16,7 @@ import java.util.Date;
 public class Pay extends Command {
     @Override
     public String getCommandFormat() {
-        return "pay $ $";
+        return "pay $s $n";
     }
 
     @Override
@@ -42,7 +42,7 @@ public class Pay extends Command {
 
         if(Bukkit.getPlayer(args.get(0).getString()) == null)
         {
-            ((Player)interactable).getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',"&2That player does not exist!"));
+            ((Player)interactable).getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',"&2Player is not online!"));
             return;
         }
 

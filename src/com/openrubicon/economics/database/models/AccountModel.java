@@ -29,21 +29,11 @@ public class AccountModel extends DatabaseModel<AccountModel> {
 
 
     public AccountModel() {
-        this.uuid = "";
-        this.name = "";
-        this.bal = 0;
-        this.created_at = new Date();
-        this.updated_at = new Date();
-        this.deleted_at = null;
     }
 
     public AccountModel(PlayerAccount pa){
         this.uuid = pa.getUser().getUniqueId().toString();
         this.name = pa.getUser().getName();
-        this.bal = pa.getBalance();
-        this.created_at = new Date();
-        this.updated_at = new Date();
-        this.deleted_at = null;
     }
 
     public double getBal() {
@@ -78,12 +68,31 @@ public class AccountModel extends DatabaseModel<AccountModel> {
         this.id = id;
     }
 
+    public Date getCreated_at(){return this.created_at;}
+
+    public void setCreated_at(Date date){
+        this.created_at = date;
+    }
+
+    public Date getUpdated_at(){return this.updated_at;}
+
+    public void setUpdated_at(Date date){
+        this.updated_at = date;
+    }
+
+    public Date getDeleted_at(){return this.deleted_at;}
+
+    public void setDeleted_at(Date date){
+        this.deleted_at = date;
+    }
+
+
     /**
      * Inserts the current account model into the datqabase as a new entry
      * @return  true
      */
     public boolean insertInto(){
-        this.insert("uuid, name, bal, created_at, updated_at", ":uuid, :name, :bal, :created_at, :updated_at").executeInsert();
+        this.insert("uuid, name, bal", ":uuid, :name, :bal").executeInsert();
         return true;
     }
 
@@ -92,7 +101,7 @@ public class AccountModel extends DatabaseModel<AccountModel> {
      * @return true
      */
     public boolean updateModel() {
-        this.update().set("uuid, name, bal, created_at, updated_at", ":uuid, :name, :bal, :created_at, :updated_at").executeUpdate();
+        this.update().set("uuid", ":uuid").set("name", ":name").set("bal", ":bal").executeUpdate();
         return true;
     }
 
@@ -100,9 +109,8 @@ public class AccountModel extends DatabaseModel<AccountModel> {
      * Gets the account from the database using the name specified
      * @return true
      */
-    public boolean getAccount(){
-        this.select("*").where("uuid = :uuid and name = :name").executeFetch(this.getClass());
-        return true;
+    public AccountModel getAccount(){
+        return this.selectAll().where("uuid", ":uuid").where("name", ":name").executeFetchFirst(AccountModel.class);
     }
 
     /**
@@ -131,5 +139,20 @@ public class AccountModel extends DatabaseModel<AccountModel> {
     @Override
     public int getVersion() {
         return version;
+    }
+
+    /**
+     * Update an existing database model using a player account.
+     * @param playerAccount The player account
+     */
+    public boolean updateWithAccount(PlayerAccount playerAccount){
+
+        if(playerAccount.getUser().getName().equals(this.name) && playerAccount.getUser().getUniqueId().toString().equals(this.uuid)){
+            //set the new balance
+            this.bal = playerAccount.getBalance();
+            return this.updateModel();
+        } else {
+            return false;
+        }
     }
 }

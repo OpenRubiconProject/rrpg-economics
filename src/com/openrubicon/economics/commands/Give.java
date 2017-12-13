@@ -17,7 +17,7 @@ import java.util.Date;
 public class Give extends Command {
     @Override
     public String getCommandFormat() {
-        return "give $ $";
+        return "give $ $n";
     }
 
     @Override
@@ -45,7 +45,7 @@ public class Give extends Command {
                         if (args.get(1).getDouble() > 0) {
                             Double amount = args.get(1).getDouble();
                             RRPGEconomics.economy.depositPlayer(Bukkit.getPlayer(args.get(0).getString()), amount);
-                            thePlayer.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&2Gave " + args.get(0) + " " + amount + RRPGEconomics.economy.currencyNamePlural()));
+                            thePlayer.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&2Gave " + args.get(0).getString() + " " + amount + RRPGEconomics.economy.currencyNamePlural()));
                             if (Bukkit.getPlayer(args.get(0).getString()).isOnline()) {
                                 Bukkit.getPlayer(args.get(0).getString()).sendMessage(ChatColor.translateAlternateColorCodes('&', "&2You were given " + amount + RRPGEconomics.economy.currencyNamePlural()));
                             }

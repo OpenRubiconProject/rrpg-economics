@@ -48,6 +48,7 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
             if(!hasAccount(player)){
                 createPlayerAccount(player);
             }
+            Bukkit.broadcastMessage("Creating Account");
         }
 
         public EconomyServerListener(){
@@ -99,12 +100,16 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
     @Override
     public boolean createPlayerAccount(OfflinePlayer player) {
         //If the player has never played before but the player is now online, make them an account
-        if (player.hasPlayedBefore() && player.isOnline()){
+        Bukkit.broadcastMessage("creating Account");
+        if (player.isOnline()){
+            Bukkit.broadcastMessage("Player Online");
             String uuid = player.getUniqueId().toString();
             //If their uuid is not in the database, check the hashmap.
             if(!existsInDatabase(player)) {
+                Bukkit.broadcastMessage("Not in database");
                 //If their account does not exist in the hast map, we will create a new account for them
                 if(!accountHash.containsKey(player)) {
+                    Bukkit.broadcastMessage("Not in Hash Map");
                     //Create a new account for them
                     PlayerAccount account = new PlayerAccount(player, 0.0);
                     AccountModel am = new AccountModel(account);
@@ -118,11 +123,18 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
                     }
                 }
                 //If the account exists in the hash map but not in the database, nothing needs to be done
-                //Will regularly update accounts.
+                //Will regularly updateWithAccount accounts.
+                return true;
+            } else {
+                Bukkit.broadcastMessage("In database, adding to hash");
+                //If the player exists in the database, the player has an account.
+                //Get the account and add it to the hash map.
+                PlayerAccount p = new PlayerAccount(getFromDatabase(player));
+                accountHash.put(player, p);
+                Bukkit.broadcastMessage("Added to hash");
+                Bukkit.broadcastMessage("Name: " + p.getUser().getName() + " Balance: " + p.getBalance() + " uuid: " + p.getUser().getPlayer().getUniqueId().toString());
                 return true;
             }
-            //If the player exists in the database, the player has an account
-            return true;
         }
         //If the player is offline or the player has not player on the server, we shouldn't be creating an account for them
         return false;
@@ -147,8 +159,10 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
                 Double divisor = Math.pow(10, RRPGEconomics.economy.fractionalDigits());
                 Double d = new Double((Math.round(accountHash.get(player).getBalance() * divisor) / divisor));
 
-                //update the database
-                if(new AccountModel(accountHash.get(player)).insertInto()){
+                //updateWithAccount the database
+                AccountModel am = getFromDatabase(player);
+                am.setBal(accountHash.get(player).getBalance());
+                if(am.updateModel()){
                     return EconomyResponse.Success();
                 } else {
                     return EconomyResponse.Failure("SQL error");
@@ -177,8 +191,10 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
             Double divisor = Math.pow(10, RRPGEconomics.economy.fractionalDigits());
             Double d = new Double((Math.round(accountHash.get(player).getBalance() * divisor) / divisor));
 
-            //update the database
-            if(new AccountModel(accountHash.get(player)).updateModel()){
+            //updateWithAccount the database
+            AccountModel am = getFromDatabase(player);
+            am.setBal(accountHash.get(player).getBalance());
+            if(am.updateModel()){
                 return EconomyResponse.Success();
             } else {
                 //Undo if the database cannot update
@@ -215,16 +231,15 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         //Check if the user has played on the server.
         if (player.hasPlayedBefore()){
             //If the player has played on the server, check if they exist in the hash map
-            String uuid = player.getUniqueId().toString();
-            if(accountHash.containsKey(uuid)){
+            if(accountHash.containsKey(player)){
                 //Return the balance
-                return accountHash.get(uuid).getBalance();
+                return accountHash.get(player).getBalance();
             } else {
                 //If the player has played on the server but doesn't have an account, we will create an account.
                 createPlayerAccount(player);
 
                 Double divisor = Math.pow(10, RRPGEconomics.economy.fractionalDigits());
-                Double d = new Double((Math.round(accountHash.get(uuid).getBalance() * divisor) / divisor));
+                Double d = new Double((Math.round(accountHash.get(player).getBalance() * divisor) / divisor));
 
                 return d;
             }
@@ -322,7 +337,7 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
      */
     @Override
     public boolean hasAccount(OfflinePlayer offlinePlayer) {
-        return false;
+        return accountHash.containsKey(offlinePlayer);
     }
 
     private void loadHashMap() {
@@ -357,7 +372,7 @@ public class Economy extends com.openrubicon.core.api.vault.economy.Economy impl
         AccountModel am = new AccountModel();
         am.setName(p.getName());
         am.setUuid(p.getUniqueId().toString());
-        am.getAccount();
+        am = am.getAccount();
         return am;
     }
 

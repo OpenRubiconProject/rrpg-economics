@@ -17,7 +17,7 @@ import java.util.Date;
 public class Take extends Command {
     @Override
     public String getCommandFormat() {
-        return "take $ $";
+        return "take $s $n";
     }
 
     @Override
